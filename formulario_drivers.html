@@ -1,0 +1,235 @@
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de entregadores captados</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Cor de fundo suave */
+        }
+        .container {
+            max-width: 900px; /* Largura máxima para o formulário */
+        }
+        input[type="text"], input[type="tel"], input[type="email"] {
+            border-radius: 0.5rem; /* Bordas arredondadas */
+            padding: 0.75rem 1rem; /* Preenchimento confortável */
+            border: 1px solid #d1d5db; /* Borda sutil */
+            width: 100%; /* Largura total */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Sombra leve */
+        }
+        button {
+            border-radius: 0.5rem; /* Bordas arredondadas */
+            padding: 0.75rem 1.25rem; /* Preenchimento confortável */
+            font-weight: 600; /* Texto em negrito */
+            transition: background-color 0.2s ease-in-out; /* Transição suave */
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* Cor primária (índigo) */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* Cor primária mais escura no hover */
+        }
+        .btn-secondary {
+            background-color: #e5e7eb; /* Cor secundária (cinza claro) */
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db; /* Cor secundária mais escura no hover */
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem; /* Bordas mais arredondadas para o card */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Sombra mais pronunciada */
+        }
+        .delete-button {
+            background-color: #ef4444; /* Cor vermelha para o botão de exclusão */
+            color: white;
+        }
+        .delete-button:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8 lg:p-10 flex items-center justify-center min-h-screen">
+    <div class="container mx-auto card p-6 sm:p-8 md:p-10 lg:p-12">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Base de entregadores captados para retirada de Bag</h1>
+        <p class="text-gray-600 mb-8 text-center">
+            Por favor, preencha as informações dos drivers que farão parte da frota da unidade. Certifique-se de que todos os drivers já estejam cadastrados e liberados no app da 99, pois casos onde estiver irregularidade serão desconsiderados da ação e não poderão retirar a bag. Apenas os drivers enviados constarão na lista do evento e receberão convites.
+            A ação da retirada das bags vai acontecer de 21/7 a 1/8 e os convites serão enviados pelo app da 99 apenas aos entregadores aqui listados. Pontos de retirada: Pacaembu, Santo André e Osasco
+        </p>
+
+        <form id="driverForm" class="space-y-6">
+            <!-- Informações do OL -->
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Dados do OL</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6"> <!-- Changed to 3 columns for unit name -->
+                    <div>
+                        <label for="franchiseeName" class="block text-sm font-medium text-gray-700 mb-1">Nome do responsável</label>
+                        <input type="text" id="franchiseeName" name="franchiseeName" required
+                               class="focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="franchiseeEmail" class="block text-sm font-medium text-gray-700 mb-1">Email da unidade</label>
+                        <input type="email" id="franchiseeEmail" name="franchiseeEmail" required
+                               class="focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="unitName" class="block text-sm font-medium text-gray-700 mb-1">Nome da OL</label>
+                        <input type="text" id="unitName" name="unitName" required
+                               class="focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Drivers -->
+            <div id="driversContainer" class="space-y-6">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Drivers Captados</h2>
+                <!-- Driver 1 (initial) -->
+                <div class="driver-entry p-5 border border-gray-200 rounded-lg bg-gray-50 relative">
+                    <h3 class="text-xl font-medium text-gray-800 mb-4">Driver 1</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="driverName_1" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo do Driver</label>
+                            <input type="text" id="driverName_1" name="driverName[]" required
+                                   class="focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="driverCpf_1" class="block text-sm font-medium text-gray-700 mb-1">CPF do Driver</label>
+                            <input type="text" id="driverCpf_1" name="driverCpf[]" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00"
+                                   class="focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <!-- Removed Driver Phone field -->
+                        <div>
+                            <label for="driver99Status_1" class="block text-sm font-medium text-gray-700 mb-1">Status 99 App (Confirmar Liberado)</label>
+                            <input type="text" id="driver99Status_1" name="driver99Status[]" required placeholder="Ex: Liberado, Pendente, Rejeitado"
+                                   class="focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-8 space-x-4">
+                <button type="button" id="addDriverBtn" class="btn-secondary flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    Adicionar Outro Driver
+                </button>
+                <button type="submit" class="btn-primary flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Enviar Cadastro
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let driverCount = 1;
+
+        document.getElementById('addDriverBtn').addEventListener('click', function() {
+            driverCount++;
+            const driversContainer = document.getElementById('driversContainer');
+            const newDriverEntry = document.createElement('div');
+            newDriverEntry.className = 'driver-entry p-5 border border-gray-200 rounded-lg bg-gray-50 relative';
+            newDriverEntry.innerHTML = `
+                <h3 class="text-xl font-medium text-gray-800 mb-4">Driver ${driverCount}</h3>
+                <button type="button" class="delete-button absolute top-4 right-4 p-2 rounded-full text-white" onclick="removeDriver(this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="driverName_${driverCount}" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo do Driver</label>
+                        <input type="text" id="driverName_${driverCount}" name="driverName[]" required
+                               class="focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="driverCpf_${driverCount}" class="block text-sm font-medium text-gray-700 mb-1">CPF do Driver</label>
+                        <input type="text" id="driverCpf_${driverCount}" name="driverCpf[]" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00"
+                               class="focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <!-- Removed Driver Phone field -->
+                    <div>
+                        <label for="driver99Status_${driverCount}" class="block text-sm font-medium text-gray-700 mb-1">Status 99 App (Confirmar Liberado)</label>
+                        <input type="text" id="driver99Status_${driverCount}" name="driver99Status[]" required placeholder="Ex: Liberado, Pendente, Rejeitado"
+                               class="focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+            `;
+            driversContainer.appendChild(newDriverEntry);
+        });
+
+        function removeDriver(button) {
+            const driverEntry = button.closest('.driver-entry');
+            if (document.querySelectorAll('.driver-entry').length > 1) { // Prevent removing the last driver entry
+                driverEntry.remove();
+            } else {
+                // You could add a message here that at least one driver is required
+                console.log("Pelo menos um driver é necessário.");
+            }
+        }
+
+        document.getElementById('driverForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/a/macros/99app.com/s/AKfycbznpFQkuN5zL0XMBota9x6IWFuC4ClR1r4GFVTkKbIyEBp5matX05pbONHjjdVL8jpjWg/exec'; // <<< URL do Apps Script atualizado
+
+            const formData = new FormData(this);
+            const data = {};
+
+            // Get OL data
+            data.franchiseeName = formData.get('franchiseeName');
+            data.franchiseeEmail = formData.get('franchiseeEmail');
+            data.unitName = formData.get('unitName');
+
+            // Get driver data
+            data.drivers = [];
+            const driverNames = formData.getAll('driverName[]');
+            const driverCpfs = formData.getAll('driverCpf[]');
+            const driver99Statuses = formData.getAll('driver99Status[]');
+
+            for (let i = 0; i < driverNames.length; i++) {
+                data.drivers.push({
+                    name: driverNames[i],
+                    cpf: driverCpfs[i],
+                    status99App: driver99Statuses[i]
+                });
+            }
+
+            console.log('Dados do Formulário:', data);
+
+            // Envia os dados para o Google Apps Script
+            fetch(GOOGLE_APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Sucesso:', result);
+                if (result.status === 'success') {
+                    alert('Formulário enviado com sucesso! Os dados foram gravados na sua planilha.');
+                    this.reset(); // Reseta o formulário após o envio
+                    // Limpa as entradas de drivers adicionadas dinamicamente, exceto a primeira
+                    const driversContainer = document.getElementById('driversContainer');
+                    while (driversContainer.children.length > 1) {
+                        driversContainer.removeChild(driversContainer.lastChild);
+                    }
+                    driverCount = 1; // Reseta a contagem de drivers
+                } else {
+                    alert('Ocorreu um erro ao enviar o formulário: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Ocorreu um erro ao enviar o formulário. Verifique a conexão e o URL do Apps Script.');
+            });
+        });
+    </script>
+</body>
+</html>
