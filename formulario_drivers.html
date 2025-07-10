@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -60,8 +60,10 @@
     <div class="container mx-auto card p-6 sm:p-8 md:p-10 lg:p-12">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Base de entregadores captados para retirada de Bag</h1>
         <p class="text-gray-600 mb-8 text-center">
-            Por favor, preencha as informações dos drivers que farão parte da frota da unidade. Certifique-se de que todos os drivers já estejam cadastrados e liberados no app da 99, pois casos onde estiver irregularidade serão desconsiderados da ação e não poderão retirar a bag. Apenas os drivers enviados constarão na lista do evento e receberão convites.
-            A ação da retirada das bags vai acontecer de 21/7 a 1/8 e os convites serão enviados pelo app da 99 apenas aos entregadores aqui listados. Pontos de retirada: Pacaembu, Santo André e Osasco
+            Para garantir que seus entregadores participem da nossa próxima ação de retirada de bags, pedimos que preencha as informações da frota da sua unidade.
+            É crucial que todos já estejam devidamente cadastrados e liberados no app da 99. Entregadores com qualquer tipo de irregularidade não poderão participar da ação e não terão acesso às bags.
+            Os motoristas com cadastro regular listados neste envio receberão convites via app da 99 para o evento, que ocorrerá de 21 de julho a 1º de agosto.
+            Os pontos de retirada serão: Pacaembu, Santo André e Osasco.
         </p>
 
         <form id="driverForm" class="space-y-6">
@@ -127,7 +129,28 @@
         </form>
     </div>
 
-    <script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEswPG3rGRyVvuMihB2odfnjeRKIgoNGo",
+            authDomain: "drivers-ol.firebaseapp.com",
+            projectId: "drivers-ol",
+            storageBucket: "drivers-ol.firebasestorage.app",
+            messagingSenderId: "313099574998",
+            appId: "1:313099574998:web:0ea8046c4766d3fc82f377",
+            measurementId: "G-K329R3HXJP"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Use getFirestore para a sintaxe modular
+        const auth = getAuth(app);   // Use getAuth para a sintaxe modular
+
         let driverCount = 1;
 
         document.getElementById('addDriverBtn').addEventListener('click', function() {
@@ -151,9 +174,8 @@
                         <input type="text" id="driverCpf_${driverCount}" name="driverCpf[]" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00"
                                class="focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-                    <!-- Removed Driver Phone field -->
                     <div>
-                        <label for="driver99Status_${driverCount}" class="block text-sm font-medium text-gray-700 mb-1">Status 99 App (Confirmar Liberado)</label>
+                        <label for="driver99Status_${driverCount}" class="block text-sm font-medium text-gray-700 mb-1">Status 99 App do Driver ${driverCount} (Confirmar Liberado)</label>
                         <input type="text" id="driver99Status_${driverCount}" name="driver99Status[]" required placeholder="Ex: Liberado, Pendente, Rejeitado"
                                class="focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
@@ -164,28 +186,34 @@
 
         function removeDriver(button) {
             const driverEntry = button.closest('.driver-entry');
-            if (document.querySelectorAll('.driver-entry').length > 1) { // Prevent removing the last driver entry
+            if (document.querySelectorAll('.driver-entry').length > 1) {
                 driverEntry.remove();
             } else {
-                // You could add a message here that at least one driver is required
                 console.log("Pelo menos um driver é necessário.");
             }
         }
 
-        document.getElementById('driverForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
+        document.getElementById('driverForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
 
-            const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/a/macros/99app.com/s/AKfycbznpFQkuN5zL0XMBota9x6IWFuC4ClR1r4GFVTkKbIyEBp5matX05pbONHjjdVL8jpjWg/exec'; // <<< URL do Apps Script atualizado
+            // Autenticação anônima para permitir a escrita no Firestore
+            try {
+                await signInAnonymously(auth); // Usando a função modular
+                console.log("Autenticado anonimamente no Firebase.");
+            } catch (error) {
+                console.error("Erro na autenticação anônima:", error);
+                alert('Ocorreu um erro na autenticação. Tente novamente.');
+                return; // Impede o envio se a autenticação falhar
+            }
 
             const formData = new FormData(this);
             const data = {};
 
-            // Get OL data
+            data.timestamp = new Date(); // Adiciona timestamp
             data.franchiseeName = formData.get('franchiseeName');
             data.franchiseeEmail = formData.get('franchiseeEmail');
             data.unitName = formData.get('unitName');
 
-            // Get driver data
             data.drivers = [];
             const driverNames = formData.getAll('driverName[]');
             const driverCpfs = formData.getAll('driverCpf[]');
@@ -199,36 +227,22 @@
                 });
             }
 
-            console.log('Dados do Formulário:', data);
+            console.log('Dados do Formulário para enviar ao Firestore:', data);
 
-            // Envia os dados para o Google Apps Script
-            fetch(GOOGLE_APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Sucesso:', result);
-                if (result.status === 'success') {
-                    alert('Formulário enviado com sucesso! Os dados foram gravados na sua planilha.');
-                    this.reset(); // Reseta o formulário após o envio
-                    // Limpa as entradas de drivers adicionadas dinamicamente, exceto a primeira
-                    const driversContainer = document.getElementById('driversContainer');
-                    while (driversContainer.children.length > 1) {
-                        driversContainer.removeChild(driversContainer.lastChild);
-                    }
-                    driverCount = 1; // Reseta a contagem de drivers
-                } else {
-                    alert('Ocorreu um erro ao enviar o formulário: ' + result.message);
+            try {
+                // Adiciona o documento à coleção 'drivers' no Firestore usando a função modular
+                await addDoc(collection(db, 'drivers'), data);
+                alert('Formulário enviado com sucesso! Os dados foram gravados no Firestore.');
+                this.reset(); // Reseta o formulário
+                const driversContainer = document.getElementById('driversContainer');
+                while (driversContainer.children.length > 1) {
+                    driversContainer.removeChild(driversContainer.lastChild);
                 }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Ocorreu um erro ao enviar o formulário. Verifique a conexão e o URL do Apps Script.');
-            });
+                driverCount = 1;
+            } catch (error) {
+                console.error('Erro ao enviar dados para o Firestore:', error);
+                alert('Ocorreu um erro ao enviar o formulário. Verifique as regras do Firestore e sua conexão.');
+            }
         });
     </script>
 </body>
